@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+/*
+  Brand palette extracted from the reri-flutter repo's assets/images/logo.png
+  (exact pixel colors via PIL getcolors), then extended with WCAG-checked
+  variants for roles the raw logo hues can't safely fill (white-on-color CTAs,
+  text-on-tint). Raw `pink`/`teal` are for decorative/icon use only — never
+  put white text on them (contrast ~3.5-3.8) and never use them as text on
+  their own tints (contrast ~3.2).
+*/
+@theme {
+  --color-pink: #C65E9E;
+  --color-pink-cta: #AD3D82;
+  --color-pink-dark: #351328;
+  --color-pink-tint: #F7E8F1;
+  --color-on-pink: #69254F;
+
+  --color-teal: #0097B2;
+  --color-teal-cta: #00798F;
+  --color-teal-dark: #004E5C;
+  --color-on-teal: #004E5C;
+  --color-teal-tint: #E0FAFF;
+  --color-bright-teal: #3DE2FF;
+
+  --color-accent: #EE9DD6;
+
+  --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: #FAFAFA;
+  color: #1A1A1A;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
