@@ -6,7 +6,6 @@ import { useAuth } from '../context/AuthContext';
 const MENU: { to: string; icon: string; label: string }[] = [
   { to: '/bookings', icon: '🗓️', label: 'My Bookings' },
   { to: '/wallet', icon: '👛', label: 'Wallet' },
-  { to: '/host', icon: '🏠', label: 'Become a Host' },
 ];
 
 const SUPPORT_PHONE = '8999 999 333';
@@ -72,6 +71,18 @@ export function ProfilePage() {
               </button>
             ))}
         </div>
+
+        <Link
+          to="/host"
+          className="mt-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-pink-dark to-pink-dark-2 p-4"
+        >
+          <div>
+            <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-bright-teal">Earn on ReRo</p>
+            <p className="text-base font-semibold text-white">List Your Home</p>
+            <p className="mt-0.5 text-xs text-pink-on-dark-soft">Starting at Rs 99/hour, per guest</p>
+          </div>
+          <span aria-hidden className="text-3xl text-bright-teal">🏠</span>
+        </Link>
 
         <div className="mt-4 divide-y divide-pink-tint overflow-hidden rounded-2xl border border-pink-tint bg-white">
           {MENU.map((item) => (

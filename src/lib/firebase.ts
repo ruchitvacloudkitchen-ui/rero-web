@@ -24,6 +24,13 @@ function ensureApp(): FirebaseApp {
   return app;
 }
 
+export function getFirebaseApp(): FirebaseApp {
+  if (isMockMode()) {
+    throw new Error('getFirebaseApp() called in mock mode — check isMockMode() first.');
+  }
+  return ensureApp();
+}
+
 export function getFirebaseAuth(): Auth {
   if (isMockMode()) {
     throw new Error('getFirebaseAuth() called in mock mode — check isMockMode() first.');

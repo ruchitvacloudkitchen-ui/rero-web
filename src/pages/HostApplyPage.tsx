@@ -1,114 +1,277 @@
-import { type FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BrandHeaderBar } from '../components/layout/BrandHeaderBar';
-import { ROOM_CATEGORIES } from '../types';
+import { StepDetails, type Amenities } from '../components/host-apply/StepDetails';
+import { StepLocation } from '../components/host-apply/StepLocation';
+import { StepOwnerVerification, type OwnerInfoDraft } from '../components/host-apply/StepOwnerVerification';
+import { StepPhotos, type DraftImage } from '../components/host-apply/StepPhotos';
+import { StepPricing } from '../components/host-apply/StepPricing';
+import { StepPropertyType } from '../components/host-apply/StepPropertyType';
+import { StepReview } from '../components/host-apply/StepReview';
+import { StepTitleDescription } from '../components/host-apply/StepTitleDescription';
+import { WizardShell } from '../components/host-apply/WizardShell';
+import { useAuth } from '../context/AuthContext';
+import { submitListing } from '../services/hostListingService';
+import { uploadListingImage } from '../services/storageService';
+import type { PropertyType } from '../types';
 
-// The actual listing-submission form — reached from HostPage's (the
-// marketing/pitch page matching the reference mockup) "List your room" /
-// "Become a Host" CTA buttons, since neither reference image shows form
-// fields, just the pitch. Kept as its own page rather than folded into
-// HostPage so the pitch stays exactly matched to the reference.
+const STEP_TITLES = [
+  { title: 'What are you listing?', subtitle: 'Choose the type of place guests will get.' },
+  { title: 'Where is it?', subtitle: 'ReRo only operates in Hyderabad right now.' },
+  { title: 'Tell us the details', subtitle: 'Guests use this to decide if it fits.' },
+  { title: 'Add some photos', subtitle: 'Listings with real photos get booked faster.' },
+  { title: 'Give it a title', subtitle: 'Make it easy to picture the space.' },
+  { title: 'Set your price', subtitle: "ReRo bookings are hourly, not nightly." },
+  { title: 'Verify you own this place', subtitle: 'Kept private — for manual review only.' },
+  { title: 'Review & submit', subtitle: 'Take a last look before it goes to review.' },
+];
+
+const draftId = () => `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
 export function HostApplyPage() {
   const navigate = useNavigate();
-  const [submitted, setSubmitted] = useState(false);
-  const [title, setTitle] = useState('');
+  const { user, signIn, loading: authLoading } = useAuth();
+  const [signingIn, setSigningIn] = useState(false);
+
+  const [step, setStep] = useState(0);
+  const [propertyType, setPropertyType] = useState<PropertyType | null>(null);
   const [address, setAddress] = useState('');
+  const [area, setArea] = useState('');
+  const [maxGuests, setMaxGuests] = useState(2);
+  const [roomSizeSqft, setRoomSizeSqft] = useState('');
+  const [amenities, setAmenities] = useState<Amenities>({
+    hasAc: false,
+    hasWifi: false,
+    hasBathroom: false,
+    hasParking: false,
+    isInstantBook: false,
+    isWomenFriendly: false,
+  });
+  const [images, setImages] = useState<DraftImage[]>([]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [pricePerHour, setPricePerHour] = useState('99');
-  const [category, setCategory] = useState(ROOM_CATEGORIES[0].id);
+  const [ownerInfo, setOwnerInfo] = useState<OwnerInfoDraft>({
+    fullName: '',
+    phone: '',
+    idType: 'aadhaar',
+    idNumber: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submittedId, setSubmittedId] = useState<string | null>(null);
+  const listingDraftId = useState(draftId)[0];
 
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
-  if (submitted) {
+  if (!authLoading && !user) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-teal-tint text-3xl">🎉</div>
-        <h1 className="mt-4 text-lg font-bold text-gray-900">Listing submitted!</h1>
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-pink-tint text-3xl">🔑</div>
+        <h1 className="mt-4 text-lg font-bold text-gray-900">Sign in to list your home</h1>
         <p className="mt-2 max-w-xs text-sm text-gray-500">
-          "{title || 'Your room'}" has been submitted for review. This is a demo flow — no listing is actually
-          created in Firestore yet.
+          We need to know who's listing so bookings and payouts go to the right person.
         </p>
         <button
           type="button"
-          onClick={() => navigate('/')}
-          className="mt-6 rounded-full bg-pink-cta px-6 py-3 text-sm font-semibold text-white shadow"
+          disabled={signingIn}
+          onClick={async () => {
+            setSigningIn(true);
+            try {
+              await signIn();
+            } finally {
+              setSigningIn(false);
+            }
+          }}
+          className="mt-6 rounded-full bg-pink-cta px-6 py-3 text-sm font-semibold text-white shadow disabled:opacity-60"
         >
-          Back to Home
+          {signingIn ? 'Signing in…' : 'Sign in with Google'}
         </button>
       </div>
     );
   }
 
-  return (
-    <div className="pb-10">
-      <BrandHeaderBar backLabel="Become a Host" tagline={false} />
-
-      <div className="p-4">
-        <h1 className="text-lg font-bold text-gray-900">List Your Room</h1>
-        <p className="mt-1 text-sm text-gray-500">Earn extra income by hosting travelers for a few hours or a night.</p>
-
-        <form onSubmit={submit} className="mt-5 space-y-4">
-          <div>
-            <label className="text-xs font-semibold text-gray-600">Room title</label>
-            <input
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Cozy Studio near Banjara Hills"
-              className="mt-1 w-full rounded-xl border border-pink-tint px-3 py-2.5 text-sm outline-none focus:border-pink-cta"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-gray-600">Address</label>
-            <input
-              required
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Street, area, Hyderabad"
-              className="mt-1 w-full rounded-xl border border-pink-tint px-3 py-2.5 text-sm outline-none focus:border-pink-cta"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-gray-600">Price per hour (Rs)</label>
-            <input
-              required
-              type="number"
-              min={49}
-              value={pricePerHour}
-              onChange={(e) => setPricePerHour(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-pink-tint px-3 py-2.5 text-sm outline-none focus:border-pink-cta"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-gray-600">Category</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-pink-tint bg-white px-3 py-2.5 text-sm outline-none focus:border-pink-cta"
-            >
-              {ROOM_CATEGORIES.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-700">
-            Demo flow — no KYC, image upload, or real Firestore write happens yet. Submitting just shows a
-            confirmation screen.
-          </p>
-
-          <button type="submit" className="w-full rounded-full bg-teal-cta py-3 text-sm font-semibold text-white shadow">
-            Submit Listing
-          </button>
-        </form>
+  if (submittedId) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-teal-tint text-4xl">🎉</div>
+        <h1 className="mt-5 text-xl font-bold text-gray-900">You're almost live!</h1>
+        <p className="mt-2 max-w-xs text-sm text-gray-500">
+          Your listing is under review and typically goes live within 24–72 hours. We'll notify you once it's
+          approved.
+        </p>
+        <p className="mt-1 text-xs text-gray-400">Listing ID: {submittedId}</p>
+        <button
+          type="button"
+          onClick={() => navigate('/profile')}
+          className="mt-8 rounded-full bg-pink-cta px-6 py-3 text-sm font-semibold text-white shadow"
+        >
+          Back to Profile
+        </button>
       </div>
-    </div>
+    );
+  }
+
+  if (!user) {
+    return <div className="p-6 text-center text-sm text-gray-400">Loading…</div>;
+  }
+
+  const goBack = () => {
+    if (step === 0) {
+      navigate(-1);
+    } else {
+      setStep((s) => s - 1);
+    }
+  };
+
+  const canProceed = (() => {
+    switch (step) {
+      case 0:
+        return propertyType !== null;
+      case 1:
+        return address.trim().length > 0 && area.length > 0;
+      case 2:
+        return maxGuests > 0;
+      case 3:
+        return images.length > 0 && images.every((img) => img.url !== null);
+      case 4:
+        return title.trim().length > 0 && description.trim().length > 0;
+      case 5:
+        return Number(pricePerHour) >= 49;
+      case 6:
+        return (
+          ownerInfo.fullName.trim().length > 0 &&
+          ownerInfo.phone.trim().length > 0 &&
+          ownerInfo.idNumber.trim().length > 0
+        );
+      default:
+        return true;
+    }
+  })();
+
+  const handleAddFiles = (files: FileList) => {
+    Array.from(files).forEach((file) => {
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      setImages((prev) => [...prev, { id, url: null, progress: 0, error: null }]);
+      uploadListingImage(file, user.uid, listingDraftId, (pct) => {
+        setImages((prev) => prev.map((img) => (img.id === id ? { ...img, progress: pct } : img)));
+      })
+        .then((url) => {
+          setImages((prev) => prev.map((img) => (img.id === id ? { ...img, url, progress: 100 } : img)));
+        })
+        .catch((err) => {
+          console.error('Image upload failed:', err);
+          setImages((prev) =>
+            prev.map((img) => (img.id === id ? { ...img, error: 'Upload failed — try again' } : img)),
+          );
+        });
+    });
+  };
+
+  const handleRemoveImage = (id: string) => setImages((prev) => prev.filter((img) => img.id !== id));
+
+  const handleMoveImage = (id: string, direction: -1 | 1) => {
+    setImages((prev) => {
+      const idx = prev.findIndex((img) => img.id === id);
+      const swapWith = idx + direction;
+      if (idx < 0 || swapWith < 0 || swapWith >= prev.length) return prev;
+      const next = [...prev];
+      [next[idx], next[swapWith]] = [next[swapWith], next[idx]];
+      return next;
+    });
+  };
+
+  const handleSubmit = async () => {
+    if (!propertyType) return;
+    setSubmitting(true);
+    try {
+      const id = await submitListing(
+        {
+          propertyType,
+          address,
+          area,
+          maxGuests,
+          roomSizeSqft: roomSizeSqft ? Number(roomSizeSqft) : null,
+          amenities,
+          imageUrls: images.map((img) => img.url).filter((u): u is string => u !== null),
+          title,
+          description,
+          pricePerHour: Number(pricePerHour),
+          ownerInfo,
+        },
+        user,
+      );
+      setSubmittedId(id);
+    } catch (err) {
+      console.error('Listing submit failed:', err);
+      window.alert('Something went wrong submitting your listing — please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const stepInfo = STEP_TITLES[step];
+
+  const footer = (
+    <button
+      type="button"
+      disabled={!canProceed || submitting}
+      onClick={step === STEP_TITLES.length - 1 ? handleSubmit : () => setStep((s) => s + 1)}
+      className="w-full rounded-full bg-pink-cta py-3 text-sm font-semibold text-white shadow disabled:opacity-40"
+    >
+      {step === STEP_TITLES.length - 1 ? (submitting ? 'Submitting…' : 'Submit for review') : 'Next'}
+    </button>
+  );
+
+  return (
+    <WizardShell
+      stepIndex={step}
+      stepCount={STEP_TITLES.length}
+      title={stepInfo.title}
+      subtitle={stepInfo.subtitle}
+      onBack={goBack}
+      footer={footer}
+    >
+      {step === 0 && <StepPropertyType value={propertyType} onChange={setPropertyType} />}
+      {step === 1 && (
+        <StepLocation address={address} onAddressChange={setAddress} area={area} onAreaChange={setArea} />
+      )}
+      {step === 2 && (
+        <StepDetails
+          maxGuests={maxGuests}
+          onMaxGuestsChange={setMaxGuests}
+          roomSizeSqft={roomSizeSqft}
+          onRoomSizeChange={setRoomSizeSqft}
+          amenities={amenities}
+          onToggleAmenity={(key) => setAmenities((prev) => ({ ...prev, [key]: !prev[key] }))}
+        />
+      )}
+      {step === 3 && (
+        <StepPhotos images={images} onAddFiles={handleAddFiles} onRemove={handleRemoveImage} onMove={handleMoveImage} />
+      )}
+      {step === 4 && (
+        <StepTitleDescription
+          title={title}
+          onTitleChange={setTitle}
+          description={description}
+          onDescriptionChange={setDescription}
+        />
+      )}
+      {step === 5 && <StepPricing pricePerHour={pricePerHour} onChange={setPricePerHour} />}
+      {step === 6 && (
+        <StepOwnerVerification value={ownerInfo} onChange={(patch) => setOwnerInfo((prev) => ({ ...prev, ...patch }))} />
+      )}
+      {step === 7 && propertyType && (
+        <StepReview
+          propertyType={propertyType}
+          address={address}
+          area={area}
+          maxGuests={maxGuests}
+          roomSizeSqft={roomSizeSqft}
+          amenities={amenities}
+          imageUrls={images.map((img) => img.url).filter((u): u is string => u !== null)}
+          title={title}
+          description={description}
+          pricePerHour={pricePerHour}
+          ownerInfo={ownerInfo}
+        />
+      )}
+    </WizardShell>
   );
 }

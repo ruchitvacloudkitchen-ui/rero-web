@@ -34,6 +34,14 @@ export interface Coordinates {
   lng: number;
 }
 
+// A listing's moderation state. Existing mock/seed rooms have no `status`
+// field at all and are always treated as `live` (see roomService.ts) —
+// only listings created through the new host-apply wizard set this
+// explicitly, always starting at `pending_review`. There's no admin
+// approval UI yet; flipping a doc's `status` to `live` in the Firestore
+// console is currently the only way to publish one.
+export type ListingStatus = 'pending_review' | 'live';
+
 export interface Room {
   id: string;
   title: string;
@@ -57,7 +65,47 @@ export interface Room {
   isInstantBook: boolean;
   isWomenFriendly: boolean;
   host: Host;
+  status?: ListingStatus;
+  propertyType?: PropertyType;
+  maxGuests?: number;
+  roomSizeSqft?: number;
 }
+
+export type PropertyType = 'entire_place' | 'private_room';
+
+export const PROPERTY_TYPE_LABEL: Record<PropertyType, { title: string; subtitle: string }> = {
+  entire_place: { title: 'An entire place', subtitle: 'Guests have the whole room/flat to themselves' },
+  private_room: { title: 'A private room', subtitle: 'Guests have a private room in a shared home' },
+};
+
+export type IdType = 'aadhaar' | 'pan' | 'passport';
+
+export const ID_TYPE_LABEL: Record<IdType, string> = {
+  aadhaar: 'Aadhaar',
+  pan: 'PAN',
+  passport: 'Passport',
+};
+
+// Written to `rooms/{roomId}/owner_info/info` — never to the public `rooms`
+// doc itself. Locked down by Firestore rules to the submitting user (and,
+// later, an admin) — see firestore.rules in the reri-flutter repo.
+export interface OwnerVerificationInfo {
+  fullName: string;
+  phone: string;
+  idType: IdType;
+  idNumber: string;
+  uid: string;
+  createdAt: string;
+}
+
+export const LISTING_AMENITIES = [
+  { key: 'hasAc', label: 'Air Conditioning', icon: '❄️' },
+  { key: 'hasWifi', label: 'WiFi', icon: '📶' },
+  { key: 'hasBathroom', label: 'Attached Bathroom', icon: '🚿' },
+  { key: 'hasParking', label: 'Parking', icon: '🅿️' },
+  { key: 'isInstantBook', label: 'Instant Book', icon: '⚡' },
+  { key: 'isWomenFriendly', label: 'Women Friendly', icon: '👩' },
+] as const;
 
 export interface RoomCategory {
   id: string;

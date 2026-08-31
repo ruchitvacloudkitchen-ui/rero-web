@@ -4,16 +4,10 @@ import { CallToBookBar } from '../components/layout/CallToBookBar';
 import { LanguageToggle } from '../components/layout/LanguageToggle';
 import { RoomCard, RoomCardSkeleton } from '../components/rooms/RoomCard';
 import { useLanguage } from '../context/LanguageContext';
+import { HYDERABAD_AREAS } from '../data/areas';
 import { formatPrice } from '../lib/format';
 import { getAllRooms } from '../services/roomService';
 import type { Room } from '../types';
-
-const AREAS = [
-  { name: 'Madhapur', icon: '🏙️', tint: 'pink' as const },
-  { name: 'Secunderabad', icon: '🚆', tint: 'teal' as const },
-  { name: 'Gachibowli', icon: '🌆', tint: 'teal' as const },
-  { name: 'Banjara Hills', icon: '🏘️', tint: 'pink' as const },
-];
 
 export function HomePage() {
   const { t } = useLanguage();
@@ -165,7 +159,7 @@ export function HomePage() {
       <section className="px-4 py-3.5">
         <h2 className="mb-2.5 text-[15px] font-semibold text-gray-900">Popular Hyderabad areas</h2>
         <div className="grid grid-cols-2 gap-2.5">
-          {AREAS.map((area) => (
+          {HYDERABAD_AREAS.slice(0, 4).map((area) => (
             <Link key={area.name} to={`/search?q=${encodeURIComponent(area.name)}`}>
               <div
                 className={`flex h-14 items-center justify-center rounded-[10px] ${
