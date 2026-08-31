@@ -33,14 +33,15 @@ export function HomePage() {
       {/* Full maroon hero — matches rero_home_pink_teal_final.html exactly */}
       <CallToBookBar />
       <div className="bg-pink-dark px-4 pb-4 pt-4">
-        <div className="mb-2.5 flex items-center justify-between">
-          <img src="/logo.png" alt={t('appName')} className="h-8 w-auto" />
-          <LanguageToggle />
+        <div className="mb-3.5 flex items-start justify-between">
+          <img src="/logo.png" alt={t('appName')} className="h-14 w-auto" />
+          <div className="flex flex-col items-end gap-1.5">
+            <LanguageToggle />
+            <span className="inline-flex items-center gap-1 rounded-full bg-teal-tint px-2.5 py-1.5 text-[11px] font-medium text-on-teal">
+              📍 Live in Hyderabad
+            </span>
+          </div>
         </div>
-
-        <span className="mb-2.5 inline-flex items-center gap-1 rounded-full bg-teal-tint px-2.5 py-1.5 text-[11px] font-medium text-on-teal">
-          📍 Live in Hyderabad
-        </span>
 
         <div className="mb-3.5 flex items-center gap-1.5 rounded-[10px] bg-pink-dark-2 px-3 py-2">
           <span aria-hidden className="text-sm text-bright-teal">✨</span>
