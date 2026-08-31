@@ -13,6 +13,7 @@ export function StepReview({
   title,
   description,
   pricePerHour,
+  pricePerNight,
   ownerInfo,
 }: {
   propertyType: PropertyType;
@@ -25,6 +26,7 @@ export function StepReview({
   title: string;
   description: string;
   pricePerHour: string;
+  pricePerNight: string;
   ownerInfo: { fullName: string; phone: string; idType: IdType; idNumber: string };
 }) {
   const activeAmenities = LISTING_AMENITIES.filter((a) => amenities[a.key]);
@@ -70,9 +72,15 @@ export function StepReview({
           </div>
         )}
 
-        <div className="mt-3 border-t border-pink-tint pt-3">
-          <p className="text-xs text-gray-400">Hourly rate</p>
-          <p className="text-lg font-extrabold text-pink-cta">{formatPrice(Number(pricePerHour) || 0)}/hr</p>
+        <div className="mt-3 grid grid-cols-2 gap-2 border-t border-pink-tint pt-3">
+          <div>
+            <p className="text-xs text-gray-400">Hourly rate</p>
+            <p className="text-lg font-extrabold text-pink-cta">{formatPrice(Number(pricePerHour) || 0)}/hr</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Night rate</p>
+            <p className="text-lg font-extrabold text-on-teal">{formatPrice(Number(pricePerNight) || 0)}/night</p>
+          </div>
         </div>
       </div>
 

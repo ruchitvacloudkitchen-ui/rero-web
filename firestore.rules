@@ -1,0 +1,151 @@
+// ============================================================================
+// SYNCED REFERENCE COPY. The canonical, deployed firestore.rules for this
+// project (remore-72d8a) lives in the reri-flutter repo
+// (~/Desktop/My 2nd App/firestore.rules) — deploys always run from there
+// (`firebase deploy --only firestore:rules --project remore-72d8a`). This
+// copy exists so rero-web's own repo documents the rules its code depends
+// on (e.g. hostListingService.ts, roomService.ts's status filtering) without
+// anyone having to cross-reference the other repo. Keep it byte-identical
+// to the Flutter repo's copy whenever either changes.
+// ============================================================================
+
+// ============================================================================
+// DEPLOYED to remore-72d8a via `firebase deploy --only firestore:rules`.
+//
+// Even deployed, this is still not a complete security boundary. Every
+// "admin-only" check in `lib/features/admin/` (isAdmin, suspend user,
+// approve host, issue refund, manage coupons) reads `users/{uid}.isAdmin`,
+// a plain Firestore field these rules let its owner write via `isOwner(uid)`
+// on the `users/{uid}` match block below — so a signed-in user can currently
+// set their own `isAdmin: true` via the Firestore SDK directly (a modified
+// build of this app, a REST call with their own ID token, or the Firebase
+// console's own test tools) and pass every `isAdmin()` check here too.
+// See CLAUDE.md's "Admin Dashboard" section.
+//
+// To close that specific gap:
+//   1. Set `isAdmin` as a Firebase Auth custom claim (via the Admin SDK, on
+//      a trusted server/Cloud Function — never settable by the client),
+//      instead of (or in addition to) the `users/{uid}.isAdmin` Firestore
+//      field this app currently reads. Firestore rules can read custom
+//      claims via `request.auth.token.isAdmin` with no extra read.
+//   2. Redeploy with `firebase deploy --only firestore:rules`.
+//   3. Do the equivalent for Firebase Storage (`storage.rules`) — Aadhaar/
+//      PAN/selfie images in this app are currently readable by anyone with
+//      the download URL, which Firestore rules alone don't fix.
+// ============================================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Illustrative only: trusts a Firestore field a client can write to
+    // (see setUserSuspended's `SetOptions(merge: true)` — the same write
+    // path could set `isAdmin` too, since nothing here forbids it). A real
+    // deployment should use a custom claim instead — see header comment.
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      // Real rules would split this further: a normal user should be able
+      // to update their own profile fields but NOT their own `isAdmin` or
+      // `isSuspended` — that needs field-level rules this sketch omits.
+      allow write: if isOwner(uid) || isAdmin();
+    }
+
+    // Written only by `functions/src/index.ts`'s Cloud Functions triggers,
+    // via the Admin SDK — which bypasses these rules entirely. No client
+    // path in this app writes here at all (there isn't even a "mark as
+    // read" usecase yet — see `features/notifications/`), so `write` is
+    // simply denied rather than scoped to some client capability that
+    // doesn't exist.
+    match /users/{uid}/notifications/{notificationId} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if false;
+    }
+
+    match /host_applications/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      // Only an admin may change `status` post-submission.
+      allow update: if isAdmin();
+    }
+
+    match /rooms/{roomId} {
+      // Public once live; while pending_review (or any future non-live
+      // status) only the listing's own owner or an admin can read it — a
+      // host can still preview their own submission before approval, but
+      // a direct /rooms/{id} link doesn't leak unapproved listings to
+      // anyone else. `.get('status','live')` treats legacy docs with no
+      // `status` field at all as live, matching rero-web's client-side
+      // `isPubliclyVisible` check — see that repo's roomService.ts.
+      allow read: if resource.data.get('status', 'live') == 'live'
+        || (isSignedIn() && resource.data.host.id == request.auth.uid)
+        || isAdmin();
+      allow create, update: if isSignedIn() && request.resource.data.host.id == request.auth.uid;
+      allow delete: if isAdmin();
+
+      // Owner ID-verification info collected by rero-web's host-apply
+      // wizard (full name, phone, ID type/number) — deliberately NOT
+      // public like the room doc above. Only the submitting user or an
+      // admin can read it; nothing (not even the owner) can edit it once
+      // submitted, since it's meant as a fixed record for manual review.
+      match /owner_info/{docId} {
+        allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+        allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
+    // Curated app content (Home screen carousel) — manually seeded via the
+    // Firebase console, not written by any client path, so public read
+    // (same as `rooms`) but no client write at all.
+    match /popular_locations/{locationId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid || resource.data.hostId == request.auth.uid || isAdmin());
+      allow create: if isOwner(request.resource.data.userId);
+      // Only an admin may change `status` (e.g. to `refunded`) after creation.
+      allow update: if isAdmin();
+    }
+
+    match /coupons/{couponId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /payouts/{payoutId} {
+      allow read: if isSignedIn() && (resource.data.hostId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Read-only from the client, like notifications above — no writer
+    // exists anywhere in this app yet (no top-up flow, no refund/cashback
+    // credit logic; see CLAUDE.md's "Profile Page" section), so `write` is
+    // denied rather than scoped to a client capability that doesn't exist.
+    match /wallets/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if false;
+
+      match /transactions/{transactionId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow write: if false;
+      }
+    }
+  }
+}

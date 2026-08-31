@@ -20,7 +20,7 @@ const STEP_TITLES = [
   { title: 'Tell us the details', subtitle: 'Guests use this to decide if it fits.' },
   { title: 'Add some photos', subtitle: 'Listings with real photos get booked faster.' },
   { title: 'Give it a title', subtitle: 'Make it easy to picture the space.' },
-  { title: 'Set your price', subtitle: "ReRo bookings are hourly, not nightly." },
+  { title: 'Set your price', subtitle: 'ReRo guests can book by the hour or overnight.' },
   { title: 'Verify you own this place', subtitle: 'Kept private — for manual review only.' },
   { title: 'Review & submit', subtitle: 'Take a last look before it goes to review.' },
 ];
@@ -50,6 +50,7 @@ export function HostApplyPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [pricePerHour, setPricePerHour] = useState('99');
+  const [pricePerNight, setPricePerNight] = useState('799');
   const [ownerInfo, setOwnerInfo] = useState<OwnerInfoDraft>({
     fullName: '',
     phone: '',
@@ -133,7 +134,7 @@ export function HostApplyPage() {
       case 4:
         return title.trim().length > 0 && description.trim().length > 0;
       case 5:
-        return Number(pricePerHour) >= 49;
+        return Number(pricePerHour) >= 49 && Number(pricePerNight) >= 49;
       case 6:
         return (
           ownerInfo.fullName.trim().length > 0 &&
@@ -193,6 +194,7 @@ export function HostApplyPage() {
           title,
           description,
           pricePerHour: Number(pricePerHour),
+          pricePerNight: Number(pricePerNight),
           ownerInfo,
         },
         user,
@@ -253,7 +255,14 @@ export function HostApplyPage() {
           onDescriptionChange={setDescription}
         />
       )}
-      {step === 5 && <StepPricing pricePerHour={pricePerHour} onChange={setPricePerHour} />}
+      {step === 5 && (
+        <StepPricing
+          pricePerHour={pricePerHour}
+          onPricePerHourChange={setPricePerHour}
+          pricePerNight={pricePerNight}
+          onPricePerNightChange={setPricePerNight}
+        />
+      )}
       {step === 6 && (
         <StepOwnerVerification value={ownerInfo} onChange={(patch) => setOwnerInfo((prev) => ({ ...prev, ...patch }))} />
       )}
@@ -269,6 +278,7 @@ export function HostApplyPage() {
           title={title}
           description={description}
           pricePerHour={pricePerHour}
+          pricePerNight={pricePerNight}
           ownerInfo={ownerInfo}
         />
       )}

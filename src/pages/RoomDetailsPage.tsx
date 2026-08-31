@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { formatPrice } from '../lib/format';
 import { getRoomById } from '../services/roomService';
 import type { Room } from '../types';
@@ -13,26 +14,66 @@ const AMENITY_LABELS: [keyof Room, string, string][] = [
   ['isWomenFriendly', '👩', 'Women Friendly'],
 ];
 
+type LoadState = 'loading' | 'ready' | 'not_found' | 'forbidden';
+
 export function RoomDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [room, setRoom] = useState<Room | null | undefined>(undefined);
+  const { user } = useAuth();
+  const [room, setRoom] = useState<Room | null>(null);
+  const [state, setState] = useState<LoadState>('loading');
   const [activeImg, setActiveImg] = useState(0);
 
   useEffect(() => {
     if (!id) return;
-    getRoomById(id).then((r) => setRoom(r ?? null));
+    setState('loading');
+    getRoomById(id)
+      .then((r) => {
+        if (r) {
+          setRoom(r);
+          setState('ready');
+        } else {
+          setState('not_found');
+        }
+      })
+      .catch((err) => {
+        // A pending_review listing that isn't yours throws permission-denied
+        // (see firestore.rules) — and so does a genuinely nonexistent ID,
+        // since Firestore deliberately doesn't let a denied read reveal
+        // whether the doc exists (that itself would leak information).
+        // Both show the same generic message; there's no way to tell them
+        // apart from here, by design.
+        console.error('Failed to load room:', err);
+        setState(err?.code === 'permission-denied' ? 'forbidden' : 'not_found');
+      });
   }, [id]);
 
-  if (room === undefined) {
+  if (state === 'loading') {
     return <div className="p-6 text-center text-sm text-gray-400">Loading room…</div>;
   }
-  if (room === null) {
+  if (state === 'forbidden' || state === 'not_found') {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center p-6 text-center">
+        <span aria-hidden className="text-3xl">🔒</span>
+        <p className="mt-3 text-sm font-medium text-gray-700">This listing isn't available.</p>
+        <p className="mt-1 text-xs text-gray-400">It may still be pending review, or the link may be incorrect.</p>
+        <button type="button" onClick={() => navigate('/')} className="mt-4 text-sm font-semibold text-pink-cta">
+          Back to Home
+        </button>
+      </div>
+    );
+  }
+  if (!room) {
     return <div className="p-6 text-center text-sm text-gray-400">Room not found.</div>;
   }
 
   return (
     <div className="pb-28">
+      {room.status === 'pending_review' && room.host.id === user?.uid && (
+        <div className="bg-amber-50 px-4 py-2 text-center text-xs text-amber-700">
+          This listing is pending review — only visible to you until it's approved.
+        </div>
+      )}
       <div className="relative h-72 w-full overflow-hidden bg-pink-tint">
         <img src={room.imageUrls[activeImg] ?? room.imageUrl} alt={room.title} className="h-full w-full object-cover" />
         <button

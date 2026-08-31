@@ -20,6 +20,7 @@ export interface ListingDraft {
   title: string;
   description: string;
   pricePerHour: number;
+  pricePerNight: number;
   ownerInfo: {
     fullName: string;
     phone: string;
@@ -27,14 +28,6 @@ export interface ListingDraft {
     idNumber: string;
   };
 }
-
-// A simple heuristic, not a form field — ReRo's whole pitch is hourly
-// pricing (see the task that added this flow), but the pre-existing
-// booking flow still offers a "Night Stay" duration app-wide using
-// `pricePerNight`. Rather than leave that duration silently broken for
-// listings created here (Rs 0), derive a placeholder ~8-hour-equivalent
-// nightly rate. Flagged as a simplification, not a real pricing model.
-const NIGHT_STAY_HOUR_MULTIPLIER = 8;
 
 export async function submitListing(draft: ListingDraft, user: AppUser): Promise<string> {
   const db = getFirebaseDb();
@@ -46,7 +39,7 @@ export async function submitListing(draft: ListingDraft, user: AppUser): Promise
     imageUrl: draft.imageUrls[0],
     imageUrls: draft.imageUrls,
     pricePerHour: draft.pricePerHour,
-    pricePerNight: draft.pricePerHour * NIGHT_STAY_HOUR_MULTIPLIER,
+    pricePerNight: draft.pricePerNight,
     rating: 0,
     reviewCount: 0,
     categoryIds: [],
