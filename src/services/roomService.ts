@@ -23,7 +23,7 @@ export async function getAllRooms(): Promise<Room[]> {
   const snap = await getDocs(q);
   if (snap.empty) {
     // Real Firestore is connected but there's no live listing yet (either
-    // nothing seeded, or everything that exists is still pending_review) —
+    // nothing seeded, or everything that exists is still pending_verification) —
     // fall back to the same mock catalog mock mode uses, so the site stays
     // a working demo instead of going blank.
     return MOCK_ROOMS;
@@ -40,7 +40,7 @@ export async function getRoomById(id: string): Promise<Room | undefined> {
   // back as a `permission-denied` FirebaseError here, and Firestore
   // deliberately doesn't let a denied read distinguish them (otherwise the
   // response itself would leak which room IDs exist): a genuinely
-  // nonexistent ID, or a real pending_review listing that isn't yours. Try
+  // nonexistent ID, or a real pending_verification listing that isn't yours. Try
   // the mock catalog first (covers the "id is a mock room" case the same
   // way an exists()-false response would), then let it propagate —
   // RoomDetailsPage shows one generic "not available" message either way.

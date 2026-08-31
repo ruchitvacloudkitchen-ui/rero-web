@@ -1,5 +1,14 @@
 import { formatPrice } from '../../lib/format';
-import { ID_TYPE_LABEL, LISTING_AMENITIES, PROPERTY_TYPE_LABEL, type IdType, type PropertyType } from '../../types';
+import {
+  ID_TYPE_LABEL,
+  LISTING_AMENITIES,
+  OWNERSHIP_DOC_TYPE_LABEL,
+  PROPERTY_TYPE_LABEL,
+  type IdType,
+  type OpenHours,
+  type OwnershipDocType,
+  type PropertyType,
+} from '../../types';
 import type { Amenities } from './StepDetails';
 
 export function StepReview({
@@ -14,7 +23,11 @@ export function StepReview({
   description,
   pricePerHour,
   pricePerNight,
+  minBookingHours,
+  openHours,
+  blockedDates,
   ownerInfo,
+  ownershipDocCount,
 }: {
   propertyType: PropertyType;
   address: string;
@@ -27,7 +40,11 @@ export function StepReview({
   description: string;
   pricePerHour: string;
   pricePerNight: string;
-  ownerInfo: { fullName: string; phone: string; idType: IdType; idNumber: string };
+  minBookingHours: number;
+  openHours: OpenHours;
+  blockedDates: string[];
+  ownerInfo: { fullName: string; phone: string; idType: IdType; idNumber: string; ownershipDocType: OwnershipDocType };
+  ownershipDocCount: number;
 }) {
   const activeAmenities = LISTING_AMENITIES.filter((a) => amenities[a.key]);
 
@@ -82,6 +99,19 @@ export function StepReview({
             <p className="text-lg font-extrabold text-on-teal">{formatPrice(Number(pricePerNight) || 0)}/night</p>
           </div>
         </div>
+        <p className="mt-2 text-xs text-gray-500">Minimum booking: {minBookingHours} hour{minBookingHours > 1 ? 's' : ''}</p>
+      </div>
+
+      <div className="rounded-2xl border border-pink-tint bg-white p-4">
+        <p className="text-xs font-semibold text-gray-600">Availability</p>
+        <p className="mt-1.5 text-xs text-gray-500">
+          Open {openHours.start} – {openHours.end} daily
+        </p>
+        {blockedDates.length > 0 && (
+          <p className="mt-1 text-xs text-gray-500">
+            {blockedDates.length} blackout date{blockedDates.length > 1 ? 's' : ''} set
+          </p>
+        )}
       </div>
 
       <div className="rounded-2xl border border-pink-tint bg-white p-4">
@@ -91,11 +121,15 @@ export function StepReview({
         <p className="text-xs text-gray-500">
           {ID_TYPE_LABEL[ownerInfo.idType]}: {ownerInfo.idNumber}
         </p>
+        <p className="mt-1.5 text-xs text-gray-500">
+          {OWNERSHIP_DOC_TYPE_LABEL[ownerInfo.ownershipDocType]} — {ownershipDocCount} document
+          {ownershipDocCount !== 1 ? 's' : ''} uploaded
+        </p>
       </div>
 
       <p className="rounded-xl bg-teal-tint p-3 text-xs text-on-teal">
-        Once submitted, your listing goes to <strong>pending review</strong> and typically goes live within
-        24–72 hours. You won't see it on Home/Search until then.
+        Once submitted, your listing goes to <strong>Pending Verification</strong> and typically goes live
+        within 24–72 hours. You won't see it on Home/Search until then.
       </p>
     </div>
   );

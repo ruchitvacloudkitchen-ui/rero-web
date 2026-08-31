@@ -21,7 +21,7 @@ export function StepPhotos({
       <label className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-pink-tint bg-pink-tint/40 py-8 text-center">
         <span aria-hidden className="text-2xl">📷</span>
         <span className="text-sm font-medium text-on-pink">Add photos</span>
-        <span className="text-xs text-gray-500">JPG or PNG, at least 1 required</span>
+        <span className="text-xs text-gray-500">JPG or PNG, at least 3 required — compressed automatically</span>
         <input
           type="file"
           accept="image/*"
@@ -83,6 +83,11 @@ export function StepPhotos({
           ))}
         </div>
       )}
+
+      <p className="text-xs text-gray-500">
+        {images.length}/3 minimum photos added
+        {images.length < 3 ? ` — add ${3 - images.length} more to continue` : ''}
+      </p>
     </div>
   );
 }

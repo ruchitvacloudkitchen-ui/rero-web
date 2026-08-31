@@ -1,15 +1,21 @@
 import { formatPrice } from '../../lib/format';
 
+const MIN_DURATION_OPTIONS = [1, 2, 3];
+
 export function StepPricing({
   pricePerHour,
   onPricePerHourChange,
   pricePerNight,
   onPricePerNightChange,
+  minBookingHours,
+  onMinBookingHoursChange,
 }: {
   pricePerHour: string;
   onPricePerHourChange: (v: string) => void;
   pricePerNight: string;
   onPricePerNightChange: (v: string) => void;
+  minBookingHours: number;
+  onMinBookingHoursChange: (v: number) => void;
 }) {
   const hourlyNumeric = Number(pricePerHour) || 0;
   const platformFee = 49;
@@ -48,6 +54,24 @@ export function StepPricing({
         <p className="mt-1.5 text-xs text-gray-500">
           ReRo guests can book by the hour or overnight — set a fair rate for each.
         </p>
+      </div>
+
+      <div>
+        <label className="text-xs font-semibold text-gray-600">Minimum booking duration</label>
+        <div className="mt-1.5 flex gap-2">
+          {MIN_DURATION_OPTIONS.map((h) => (
+            <button
+              key={h}
+              type="button"
+              onClick={() => onMinBookingHoursChange(h)}
+              className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium ${
+                minBookingHours === h ? 'border-pink-cta bg-pink-tint text-on-pink' : 'border-gray-200 bg-white text-gray-700'
+              }`}
+            >
+              {h} {h === 1 ? 'hour' : 'hours'}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="rounded-xl bg-teal-tint p-3">

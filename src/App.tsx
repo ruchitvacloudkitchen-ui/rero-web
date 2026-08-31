@@ -4,10 +4,12 @@ import { BrowserRouter, Outlet, Route, Routes, useNavigate } from 'react-router-
 import { BottomNav } from './components/layout/BottomNav';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { AdminListingsPage } from './pages/AdminListingsPage';
 import { BookingPage } from './pages/BookingPage';
 import { BookingSuccessPage } from './pages/BookingSuccessPage';
 import { HomePage } from './pages/HomePage';
 import { HostApplyPage } from './pages/HostApplyPage';
+import { HostDashboardPage } from './pages/HostDashboardPage';
 import { HostPage } from './pages/HostPage';
 import { MyBookingsPage } from './pages/MyBookingsPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -105,6 +107,22 @@ function AppShell() {
         element={
           <FullScreen>
             <HostApplyPage />
+          </FullScreen>
+        }
+      />
+      <Route
+        path="/host/dashboard"
+        element={
+          <FullScreen>
+            <HostDashboardPage />
+          </FullScreen>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <FullScreen>
+            <AdminListingsPage />
           </FullScreen>
         }
       />

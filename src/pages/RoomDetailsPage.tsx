@@ -37,7 +37,7 @@ export function RoomDetailsPage() {
         }
       })
       .catch((err) => {
-        // A pending_review listing that isn't yours throws permission-denied
+        // A non-live listing (pending_verification/rejected/draft) that isn't yours throws permission-denied
         // (see firestore.rules) — and so does a genuinely nonexistent ID,
         // since Firestore deliberately doesn't let a denied read reveal
         // whether the doc exists (that itself would leak information).
@@ -69,9 +69,14 @@ export function RoomDetailsPage() {
 
   return (
     <div className="pb-28">
-      {room.status === 'pending_review' && room.host.id === user?.uid && (
+      {room.status === 'pending_verification' && room.host.id === user?.uid && (
         <div className="bg-amber-50 px-4 py-2 text-center text-xs text-amber-700">
-          This listing is pending review — only visible to you until it's approved.
+          This listing is under Pending Verification — only visible to you until it's approved.
+        </div>
+      )}
+      {room.status === 'rejected' && room.host.id === user?.uid && (
+        <div className="bg-red-50 px-4 py-2 text-center text-xs text-red-600">
+          This listing was rejected{room.rejectionReason ? `: ${room.rejectionReason}` : '.'}
         </div>
       )}
       <div className="relative h-72 w-full overflow-hidden bg-pink-tint">

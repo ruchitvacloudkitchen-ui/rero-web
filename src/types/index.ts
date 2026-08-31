@@ -35,12 +35,19 @@ export interface Coordinates {
 }
 
 // A listing's moderation state. Existing mock/seed rooms have no `status`
-// field at all and are always treated as `live` (see roomService.ts) —
-// only listings created through the new host-apply wizard set this
-// explicitly, always starting at `pending_review`. There's no admin
-// approval UI yet; flipping a doc's `status` to `live` in the Firestore
-// console is currently the only way to publish one.
-export type ListingStatus = 'pending_review' | 'live';
+// field at all and are always treated as `live` (see roomService.ts).
+// `draft` is an in-progress host-apply wizard save (see
+// hostListingService.ts's getOrCreateDraft/saveDraftProgress) — auto-saved
+// on every step, never shown anywhere but the host's own dashboard (which
+// filters it out) until actually submitted, at which point it becomes
+// `pending_verification`. Flipping a doc's `status` in the Firestore
+// console still works, but the admin approval screen is the normal path.
+export type ListingStatus = 'draft' | 'pending_verification' | 'live' | 'rejected';
+
+export interface OpenHours {
+  start: string; // "HH:mm", 24h
+  end: string; // "HH:mm", 24h
+}
 
 export interface Room {
   id: string;
@@ -66,9 +73,13 @@ export interface Room {
   isWomenFriendly: boolean;
   host: Host;
   status?: ListingStatus;
+  rejectionReason?: string;
   propertyType?: PropertyType;
   maxGuests?: number;
   roomSizeSqft?: number;
+  minBookingHours?: number;
+  openHours?: OpenHours;
+  blockedDates?: string[]; // ISO "YYYY-MM-DD", host-set blackout dates
 }
 
 export type PropertyType = 'entire_place' | 'private_room';
@@ -86,14 +97,29 @@ export const ID_TYPE_LABEL: Record<IdType, string> = {
   passport: 'Passport',
 };
 
+// Proof the submitter actually owns/can list this specific property —
+// distinct from idType/idNumber above (personal identity). A photo/scan of
+// one of these gets uploaded to Storage at host_kyc/{uid}/**.
+export type OwnershipDocType = 'aadhaar' | 'utility_bill' | 'property_document';
+
+export const OWNERSHIP_DOC_TYPE_LABEL: Record<OwnershipDocType, string> = {
+  aadhaar: 'Aadhaar',
+  utility_bill: 'Utility bill',
+  property_document: 'Property document',
+};
+
 // Written to `rooms/{roomId}/owner_info/info` — never to the public `rooms`
-// doc itself. Locked down by Firestore rules to the submitting user (and,
-// later, an admin) — see firestore.rules in the reri-flutter repo.
+// doc itself. Locked down by Firestore rules to the submitting user (and
+// an admin) — see firestore.rules in the reri-flutter repo. idDocumentUrls
+// point into Storage's private host_kyc/{uid}/** path, not the public
+// room_images/ path photos use.
 export interface OwnerVerificationInfo {
   fullName: string;
   phone: string;
   idType: IdType;
   idNumber: string;
+  ownershipDocType: OwnershipDocType;
+  idDocumentUrls: string[];
   uid: string;
   createdAt: string;
 }

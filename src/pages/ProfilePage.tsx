@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 const MENU: { to: string; icon: string; label: string }[] = [
   { to: '/bookings', icon: '🗓️', label: 'My Bookings' },
   { to: '/wallet', icon: '👛', label: 'Wallet' },
+  { to: '/host/dashboard', icon: '🏘️', label: 'My Listings' },
 ];
 
 const SUPPORT_PHONE = '8999 999 333';
