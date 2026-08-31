@@ -1,47 +1,42 @@
 import { Link } from 'react-router-dom';
 import type { Room } from '../../types';
-import { useLanguage } from '../../context/LanguageContext';
+import { formatPrice } from '../../lib/format';
 
-export function RoomCard({ room, className = 'w-64 shrink-0' }: { room: Room; className?: string }) {
-  const { t } = useLanguage();
-
+export function RoomCard({
+  room,
+  className = 'w-[132px] shrink-0',
+  imageHeightClass = 'h-20',
+}: {
+  room: Room;
+  className?: string;
+  imageHeightClass?: string;
+}) {
   return (
     <Link
       to={`/rooms/${room.id}`}
-      className={`block overflow-hidden rounded-2xl border border-pink-tint bg-white shadow-sm transition-transform active:scale-[0.98] ${className}`}
+      className={`block overflow-hidden transition-transform active:scale-[0.98] ${className}`}
     >
-      <div className="relative h-36 w-full overflow-hidden bg-pink-tint">
+      <div className={`relative w-full overflow-hidden rounded-[10px] bg-[#ECE7E9] ${imageHeightClass}`}>
         <img src={room.imageUrl} alt={room.title} className="h-full w-full object-cover" loading="lazy" />
-        {room.isAvailableNow && (
-          <span className="absolute left-2 top-2 rounded-full bg-teal-cta px-2 py-0.5 text-[10px] font-semibold text-white shadow">
-            {t('availableNow')}
-          </span>
-        )}
-        <span className="absolute right-2 top-2 flex items-center gap-0.5 rounded-full bg-white/90 px-1.5 py-0.5 text-[11px] font-semibold text-on-pink">
-          ★ {room.rating.toFixed(1)}
+        <span className="absolute right-1.5 top-1.5 rounded-md bg-bright-teal px-1.5 py-0.5 text-[10px] font-semibold text-on-teal">
+          {formatPrice(room.pricePerHour)}/hr
         </span>
       </div>
-      <div className="p-3">
-        <h3 className="truncate text-sm font-semibold text-gray-900">{room.title}</h3>
-        <p className="truncate text-xs text-gray-500">{room.address}</p>
-        <div className="mt-2 flex items-baseline gap-1">
-          <span className="text-xs text-gray-400">{t('startingAt')}</span>
-          <span className="text-base font-bold text-pink-cta">₹{room.pricePerHour}</span>
-          <span className="text-xs text-gray-400">{t('perHour')}</span>
-        </div>
-      </div>
+      <p className="mt-1.5 truncate text-xs font-medium text-gray-900">{room.title}</p>
+      <p className="truncate text-[11px] text-gray-500">
+        {room.address.split(',')[0]} · ★ {room.rating.toFixed(1)}
+      </p>
     </Link>
   );
 }
 
-export function RoomCardSkeleton() {
+export function RoomCardSkeleton({ imageHeightClass = 'h-20' }: { imageHeightClass?: string }) {
   return (
-    <div className="w-64 shrink-0 animate-pulse overflow-hidden rounded-2xl border border-pink-tint bg-white shadow-sm">
-      <div className="h-36 w-full bg-pink-tint" />
-      <div className="space-y-2 p-3">
-        <div className="h-4 w-3/4 rounded bg-pink-tint" />
-        <div className="h-3 w-1/2 rounded bg-pink-tint" />
-        <div className="h-4 w-1/3 rounded bg-pink-tint" />
+    <div className="w-[132px] shrink-0 animate-pulse">
+      <div className={`w-full rounded-[10px] bg-pink-tint ${imageHeightClass}`} />
+      <div className="mt-1.5 space-y-1.5">
+        <div className="h-3 w-3/4 rounded bg-pink-tint" />
+        <div className="h-2.5 w-1/2 rounded bg-pink-tint" />
       </div>
     </div>
   );

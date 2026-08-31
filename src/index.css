@@ -1,28 +1,31 @@
 @import "tailwindcss";
 
 /*
-  Brand palette extracted from the reri-flutter repo's assets/images/logo.png
-  (exact pixel colors via PIL getcolors), then extended with WCAG-checked
-  variants for roles the raw logo hues can't safely fill (white-on-color CTAs,
-  text-on-tint). Raw `pink`/`teal` are for decorative/icon use only — never
-  put white text on them (contrast ~3.5-3.8) and never use them as text on
-  their own tints (contrast ~3.2).
+  Brand palette re-extracted 2026-08-31 from the user-supplied design source
+  of truth: "ReRo Logo 01.png" (logo hex, via PIL getcolors — unchanged from
+  the previous extraction) plus the exact inline hex values used in the
+  provided Home and Become-a-Host reference mockups
+  (rero_home_pink_teal_final.html / rero_become_a_host_page.html). These
+  values are sampled directly from those files, not approximated.
 */
 @theme {
-  --color-pink: #C65E9E;
-  --color-pink-cta: #AD3D82;
-  --color-pink-dark: #351328;
-  --color-pink-tint: #F7E8F1;
-  --color-on-pink: #69254F;
+  --color-pink: #C65E9E; /* logo wordmark — decorative only */
+  --color-pink-cta: #D6006D; /* solid CTA buttons, call bar, active chip/tab */
+  --color-pink-dark: #2B0518; /* hero/full-page maroon background */
+  --color-pink-dark-2: #4A0A2A; /* secondary surface on the maroon hero (cards, search box) */
+  --color-pink-on-dark: #F492BE; /* wordmark/heading text on the maroon hero */
+  --color-pink-on-dark-soft: #F4B8D2; /* body text on the maroon hero */
+  --color-pink-tint: #FBE1EC; /* light pink badge/section background */
+  --color-on-pink: #8A0049; /* dark pink text on pink-tint or white */
 
-  --color-teal: #0097B2;
-  --color-teal-cta: #00798F;
-  --color-teal-dark: #004E5C;
-  --color-on-teal: #004E5C;
-  --color-teal-tint: #E0FAFF;
-  --color-bright-teal: #3DE2FF;
+  --color-teal: #0097B2; /* logo cat mark — decorative only */
+  --color-teal-cta: #1AA6A6; /* solid teal banners/buttons */
+  --color-bright-teal: #6FE3D6; /* bright teal accent text/icons on the maroon hero */
+  --color-teal-tint: #DFF5F3; /* light teal badge/section background */
+  --color-on-teal: #0B5C5C; /* dark teal text on teal-tint or white */
+  --color-teal-dark: #0B5C5C;
 
-  --color-accent: #EE9DD6;
+  --color-accent: #EE9DD6; /* logo sparkle accent */
 
   --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }

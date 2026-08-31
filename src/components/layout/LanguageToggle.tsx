@@ -4,17 +4,17 @@ export function LanguageToggle() {
   const { language, setLanguage } = useLanguage();
 
   return (
-    <div className="flex overflow-hidden rounded-full border border-white/40 bg-white/10 text-xs font-semibold">
+    <div className="flex items-center gap-0.5 rounded-full bg-pink-dark-2 p-0.5">
       {(['en', 'te'] as const).map((lang) => (
         <button
           key={lang}
           type="button"
           onClick={() => setLanguage(lang)}
-          className={`px-2.5 py-1 transition-colors ${
-            language === lang ? 'bg-white text-pink-cta' : 'text-white'
+          className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
+            language === lang ? 'bg-bright-teal text-on-teal' : 'text-pink-on-dark-soft'
           }`}
         >
-          {lang === 'en' ? 'EN' : 'తె'}
+          {lang === 'en' ? 'EN' : 'తెలుగు'}
         </button>
       ))}
     </div>

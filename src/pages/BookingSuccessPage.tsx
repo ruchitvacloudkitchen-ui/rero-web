@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { formatPrice } from '../lib/format';
 import type { Booking } from '../types';
 
 export function BookingSuccessPage() {
@@ -12,7 +13,7 @@ export function BookingSuccessPage() {
       <h1 className="mt-5 text-xl font-bold text-gray-900">Booking Confirmed!</h1>
       {booking && (
         <p className="mt-2 text-sm text-gray-500">
-          {booking.roomTitle} · ₹{booking.baseAmount + booking.taxAmount + booking.platformFee}
+          {booking.roomTitle} · {formatPrice(booking.baseAmount + booking.taxAmount + booking.platformFee)}
         </p>
       )}
       <p className="mt-1 text-xs text-gray-400">Booking ID: {booking?.id ?? '—'}</p>

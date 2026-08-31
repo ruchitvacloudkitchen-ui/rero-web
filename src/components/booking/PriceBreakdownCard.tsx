@@ -1,3 +1,4 @@
+import { formatPrice } from '../../lib/format';
 import type { PriceBreakdown } from '../../types';
 
 export function PriceBreakdownCard({ breakdown }: { breakdown: PriceBreakdown }) {
@@ -14,13 +15,13 @@ export function PriceBreakdownCard({ breakdown }: { breakdown: PriceBreakdown })
         {rows.map(([label, amount]) => (
           <div key={label} className="flex justify-between text-sm text-gray-500">
             <span>{label}</span>
-            <span>₹{amount}</span>
+            <span>{formatPrice(amount)}</span>
           </div>
         ))}
       </div>
-      <div className="mt-3 flex justify-between border-t border-pink-tint pt-3 text-base font-bold text-gray-900">
+      <div className="mt-3 flex justify-between border-t border-pink-tint pt-3 text-base font-extrabold text-gray-900">
         <span>Total</span>
-        <span>₹{breakdown.totalAmount}</span>
+        <span>{formatPrice(breakdown.totalAmount)}</span>
       </div>
     </div>
   );

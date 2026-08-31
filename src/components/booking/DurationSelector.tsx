@@ -1,3 +1,4 @@
+import { formatPrice } from '../../lib/format';
 import { BOOKING_DURATION_LABEL, type BookingDuration, type Room, basePriceForDuration } from '../../types';
 
 const DURATIONS: BookingDuration[] = ['oneHour', 'twoHours', 'threeHours', 'nightStay'];
@@ -25,7 +26,7 @@ export function DurationSelector({
           }`}
         >
           <div className="text-sm font-semibold">{BOOKING_DURATION_LABEL[d]}</div>
-          <div className="text-xs text-gray-500">₹{basePriceForDuration(d, room)}</div>
+          <div className="text-xs text-gray-500">{formatPrice(basePriceForDuration(d, room))}</div>
         </button>
       ))}
     </div>

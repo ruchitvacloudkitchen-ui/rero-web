@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { BrandHeaderBar } from '../components/layout/BrandHeaderBar';
 import { RoomCard, RoomCardSkeleton } from '../components/rooms/RoomCard';
 import { searchRooms } from '../services/roomService';
 import { ROOM_CATEGORIES, type Room } from '../types';
@@ -40,7 +41,9 @@ export function SearchPage() {
   });
 
   return (
-    <div className="px-4 pb-6 pt-2">
+    <div className="pb-6">
+      <BrandHeaderBar tagline={false} />
+      <div className="px-4 pt-3">
       <div className="flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm shadow-lg shadow-pink/10 ring-1 ring-pink-tint">
         <span>🔍</span>
         <input
@@ -104,13 +107,14 @@ export function SearchPage() {
 
       <div className="mt-2 grid grid-cols-2 gap-3">
         {rooms === null
-          ? Array.from({ length: 4 }).map((_, i) => <RoomCardSkeleton key={i} />)
-          : results.map((r) => <RoomCard key={r.id} room={r} className="w-full" />)}
+          ? Array.from({ length: 4 }).map((_, i) => <RoomCardSkeleton key={i} imageHeightClass="h-32" />)
+          : results.map((r) => <RoomCard key={r.id} room={r} className="w-full" imageHeightClass="h-32" />)}
       </div>
 
       {rooms !== null && results.length === 0 && (
         <p className="mt-8 text-center text-sm text-gray-400">No rooms match these filters yet.</p>
       )}
+      </div>
     </div>
   );
 }

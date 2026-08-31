@@ -1,110 +1,98 @@
-import { type FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ROOM_CATEGORIES } from '../types';
+import { Link } from 'react-router-dom';
+import { CallToBookBar } from '../components/layout/CallToBookBar';
 
+// Matches rero_become_a_host_page.html exactly, section for section: header
+// (back label + tagline card + eyebrow + heading + price + description +
+// CTA), info banner, Host Shield checklist, 3-icon feature row, final CTA +
+// chat link. This is the marketing/pitch page — actually submitting a
+// listing happens on HostApplyPage, reached via the CTA buttons here.
 export function HostPage() {
-  const navigate = useNavigate();
-  const [submitted, setSubmitted] = useState(false);
-  const [title, setTitle] = useState('');
-  const [address, setAddress] = useState('');
-  const [pricePerHour, setPricePerHour] = useState('99');
-  const [category, setCategory] = useState(ROOM_CATEGORIES[0].id);
-
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
-  if (submitted) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-teal-tint text-3xl">🎉</div>
-        <h1 className="mt-4 text-lg font-bold text-gray-900">Listing submitted!</h1>
-        <p className="mt-2 max-w-xs text-sm text-gray-500">
-          "{title || 'Your room'}" has been submitted for review. This is a demo flow — no listing is actually
-          created in Firestore yet.
-        </p>
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="mt-6 rounded-full bg-pink-cta px-6 py-3 text-sm font-semibold text-white shadow"
-        >
-          Back to Home
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-4 pb-10">
-      <button type="button" onClick={() => navigate(-1)} className="mb-3 text-sm text-gray-500">
-        ← Back
-      </button>
-      <h1 className="text-lg font-bold text-gray-900">List Your Room</h1>
-      <p className="mt-1 text-sm text-gray-500">Earn extra income by hosting travelers for a few hours or a night.</p>
+    <div>
+      <CallToBookBar />
+      <div className="bg-pink-dark px-4 py-4">
+        <Link to="/profile" className="mb-3 flex items-center gap-2 text-sm text-pink-on-dark-soft">
+          <span aria-hidden>←</span> Become a Host
+        </Link>
 
-      <form onSubmit={submit} className="mt-5 space-y-4">
-        <div>
-          <label className="text-xs font-semibold text-gray-600">Room title</label>
-          <input
-            required
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Cozy Studio near Banjara Hills"
-            className="mt-1 w-full rounded-xl border border-pink-tint px-3 py-2.5 text-sm outline-none focus:border-pink-cta"
-          />
+        <div className="mb-3.5 flex items-center gap-1.5 rounded-[10px] bg-pink-dark-2 px-3 py-2">
+          <span aria-hidden className="text-sm text-bright-teal">✨</span>
+          <span className="text-xs font-medium text-pink-on-dark-soft">Refresh. Rest. Reset.</span>
         </div>
 
-        <div>
-          <label className="text-xs font-semibold text-gray-600">Address</label>
-          <input
-            required
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Street, area, Hyderabad"
-            className="mt-1 w-full rounded-xl border border-pink-tint px-3 py-2.5 text-sm outline-none focus:border-pink-cta"
-          />
-        </div>
-
-        <div>
-          <label className="text-xs font-semibold text-gray-600">Price per hour (₹)</label>
-          <input
-            required
-            type="number"
-            min={49}
-            value={pricePerHour}
-            onChange={(e) => setPricePerHour(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-pink-tint px-3 py-2.5 text-sm outline-none focus:border-pink-cta"
-          />
-        </div>
-
-        <div>
-          <label className="text-xs font-semibold text-gray-600">Category</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-pink-tint bg-white px-3 py-2.5 text-sm outline-none focus:border-pink-cta"
-          >
-            {ROOM_CATEGORIES.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-700">
-          Demo flow — no KYC, image upload, or real Firestore write happens yet. Submitting just shows a
-          confirmation screen.
+        <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-bright-teal">
+          For Hyderabad homeowners
         </p>
-
-        <button
-          type="submit"
-          className="w-full rounded-full bg-teal-cta py-3 text-sm font-semibold text-white shadow"
+        <p className="mb-2.5 text-[22px] font-semibold leading-tight text-white">
+          Your spare room could earn on ReRo
+        </p>
+        <div className="mb-1 flex items-baseline gap-1.5">
+          <span className="text-[32px] font-extrabold leading-none text-bright-teal">Rs 99</span>
+          <span className="text-[13px] text-pink-on-dark-soft">/ hour, per guest</span>
+        </div>
+        <p className="mb-3.5 text-xs text-pink-on-dark-soft">
+          Just 2 hours a day of guests could add over Rs 6,000 a month.
+        </p>
+        <Link
+          to="/host/apply"
+          className="block w-full rounded-lg bg-pink-cta py-3 text-center text-sm font-medium text-white"
         >
-          Submit Listing
-        </button>
-      </form>
+          List your room
+        </Link>
+      </div>
+
+      <div className="flex items-center gap-2 bg-teal-tint px-4 py-3.5">
+        <span aria-hidden className="text-base text-on-teal">👥</span>
+        <span className="text-xs text-on-teal">120+ verified hosts already earning near you</span>
+      </div>
+
+      <div className="p-4">
+        <h2 className="mb-2.5 text-[15px] font-semibold text-gray-900">ReRo Host Shield</h2>
+        <div className="flex flex-col gap-2.5">
+          {[
+            'Guest ID verification before every booking',
+            '24×7 host support line',
+            'Room damage protection on every stay',
+          ].map((item) => (
+            <div key={item} className="flex items-center gap-2">
+              <span aria-hidden className="text-teal-cta">✓</span>
+              <span className="text-[13px] text-gray-900">{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="px-4 pb-4">
+        <h2 className="mb-3 text-[15px] font-semibold text-gray-900">Hosting with ReRo</h2>
+        <div className="grid grid-cols-3 gap-2.5 text-center">
+          {[
+            { icon: '⚡', bg: 'bg-pink-tint', color: 'text-on-pink', title: 'List in minutes', sub: "A few photos and your room's live" },
+            { icon: '🪙', bg: 'bg-teal-tint', color: 'text-on-teal', title: 'Keep most of it', sub: 'Low service fee, paid out weekly' },
+            { icon: '⚙️', bg: 'bg-pink-tint', color: 'text-on-pink', title: 'Stay in control', sub: 'Set your own hours and price' },
+          ].map((f) => (
+            <div key={f.title}>
+              <div className={`mx-auto mb-1.5 flex h-11 w-11 items-center justify-center rounded-full ${f.bg}`}>
+                <span aria-hidden className={`text-lg ${f.color}`}>{f.icon}</span>
+              </div>
+              <p className="mb-0.5 text-[11px] font-medium text-gray-900">{f.title}</p>
+              <p className="text-[10px] text-gray-500">{f.sub}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="px-4 pb-8">
+        <Link
+          to="/host/apply"
+          className="mb-2.5 block w-full rounded-lg bg-pink-cta py-3 text-center text-sm font-medium text-white"
+        >
+          Become a Host
+        </Link>
+        <a href="tel:8999999333" className="flex items-center justify-center gap-1.5">
+          <span aria-hidden className="text-sm text-teal-cta">💬</span>
+          <span className="text-xs text-teal-cta">Have questions? Chat with us</span>
+        </a>
+      </div>
     </div>
   );
 }

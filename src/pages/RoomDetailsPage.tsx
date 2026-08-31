@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { formatPrice } from '../lib/format';
 import { getRoomById } from '../services/roomService';
 import type { Room } from '../types';
 
@@ -107,11 +108,11 @@ export function RoomDetailsPage() {
         <div className="mt-5 grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-pink-tint bg-pink-tint p-3">
             <p className="text-xs text-on-pink">Hourly</p>
-            <p className="text-lg font-bold text-on-pink">₹{room.pricePerHour}</p>
+            <p className="text-lg font-extrabold text-on-pink">{formatPrice(room.pricePerHour)}</p>
           </div>
           <div className="rounded-2xl border border-teal-tint bg-teal-tint p-3">
             <p className="text-xs text-on-teal">Overnight</p>
-            <p className="text-lg font-bold text-on-teal">₹{room.pricePerNight}</p>
+            <p className="text-lg font-extrabold text-on-teal">{formatPrice(room.pricePerNight)}</p>
           </div>
         </div>
       </div>
@@ -120,7 +121,7 @@ export function RoomDetailsPage() {
       <div className="fixed bottom-0 left-0 right-0 z-40 mx-auto flex max-w-md items-center justify-between border-t border-pink-tint bg-white p-4 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
         <div>
           <p className="text-xs text-gray-400">Starting at</p>
-          <p className="text-lg font-bold text-gray-900">₹{room.pricePerHour}/hr</p>
+          <p className="text-lg font-extrabold text-gray-900">{formatPrice(room.pricePerHour)}/hr</p>
         </div>
         <Link
           to={`/booking/${room.id}`}
