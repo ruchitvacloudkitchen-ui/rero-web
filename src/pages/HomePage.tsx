@@ -33,9 +33,17 @@ export function HomePage() {
       {/* Full maroon hero — matches rero_home_pink_teal_final.html exactly */}
       <CallToBookBar />
       <div className="bg-pink-dark px-4 pb-4 pt-4">
-        <div className="mb-2.5 flex items-center justify-between">
-          <span className="text-[22px] font-medium text-pink-on-dark">{t('appName')}</span>
+        <div className="flex justify-end">
           <LanguageToggle />
+        </div>
+
+        <div className="flex justify-center pb-9 pt-2">
+          <img
+            src="/logo.png"
+            alt={t('appName')}
+            className="h-24 w-auto"
+            style={{ filter: 'brightness(0) invert(1)' }}
+          />
         </div>
 
         <span className="mb-2.5 inline-flex items-center gap-1 rounded-full bg-teal-tint px-2.5 py-1.5 text-[11px] font-medium text-on-teal">
