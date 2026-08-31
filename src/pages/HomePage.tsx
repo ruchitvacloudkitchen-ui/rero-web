@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { type ComponentType, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CallToBookBar } from '../components/layout/CallToBookBar';
 import { LanguageToggle } from '../components/layout/LanguageToggle';
@@ -8,6 +8,90 @@ import { HYDERABAD_AREAS } from '../data/areas';
 import { formatPrice } from '../lib/format';
 import { getAllRooms } from '../services/roomService';
 import type { Room } from '../types';
+
+const ROTATING_LINES = ['Refresh your time.', 'Rest for your thoughts.', 'Reset your mind.', 'Relax your heart.'];
+
+function RotatingPromoCard() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setIndex((i) => (i + 1) % ROTATING_LINES.length), 2800);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <button
+      type="button"
+      onClick={() => setIndex((i) => (i + 1) % ROTATING_LINES.length)}
+      className="rounded-xl border border-pink-tint bg-pink-tint p-4 text-left"
+    >
+      <p className="min-h-[28px] text-lg font-semibold text-on-pink">{ROTATING_LINES[index]}</p>
+      <div className="mt-2 flex gap-1.5">
+        {ROTATING_LINES.map((line, i) => (
+          <span
+            key={line}
+            className={`h-1.5 rounded-full transition-all ${
+              i === index ? 'w-5 bg-pink-cta' : 'w-1.5 bg-pink-cta/30'
+            }`}
+          />
+        ))}
+      </div>
+    </button>
+  );
+}
+
+const AREA_ICON_COLOR = 'text-pink-dark';
+
+function BuildingIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className={className}>
+      <rect x="6" y="3" width="12" height="18" rx="1" />
+      {[7, 10, 13, 16].map((y) => (
+        <g key={y}>
+          <line x1="9" y1={y} x2="9" y2={y} strokeWidth={2.4} strokeLinecap="round" />
+          <line x1="15" y1={y} x2="15" y2={y} strokeWidth={2.4} strokeLinecap="round" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+function TrainIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className={className}>
+      <rect x="4" y="5" width="16" height="11" rx="3" />
+      <line x1="4" y1="11" x2="20" y2="11" />
+      <circle cx="8" cy="19" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="19" r="1.4" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function CityIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className={className}>
+      <rect x="3" y="10" width="5" height="11" />
+      <rect x="9.5" y="5" width="5" height="16" />
+      <rect x="16" y="13" width="5" height="8" />
+    </svg>
+  );
+}
+
+function HouseIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className={className}>
+      <path d="M4 12 L9 7 L14 12 V19 H4 Z" />
+      <path d="M13 15 L18 10 L22 14 V19 H13" />
+    </svg>
+  );
+}
+
+const AREA_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  Madhapur: BuildingIcon,
+  Secunderabad: TrainIcon,
+  Gachibowli: CityIcon,
+  'Banjara Hills': HouseIcon,
+};
 
 export function HomePage() {
   const { t } = useLanguage();
@@ -34,7 +118,7 @@ export function HomePage() {
       <CallToBookBar />
       <div className="bg-pink-dark px-4 pb-4 pt-4">
         <div className="mb-3.5 flex items-start justify-between">
-          <img src="/logo.png" alt={t('appName')} className="h-14 w-auto" />
+          <img src="/logo.png" alt={t('appName')} className="h-24 w-auto" />
           <div className="flex flex-col items-end gap-1.5">
             <LanguageToggle />
             <span className="inline-flex items-center gap-1 rounded-full bg-teal-tint px-2.5 py-1.5 text-[11px] font-medium text-on-teal">
@@ -43,9 +127,9 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="mb-3.5 flex items-center gap-1.5 rounded-[10px] bg-pink-dark-2 px-3 py-2">
-          <span aria-hidden className="text-sm text-bright-teal">✨</span>
-          <span className="text-xs font-medium text-pink-on-dark-soft">Refresh. Rest. Reset.</span>
+        <div className="mb-3.5 flex items-center gap-2 rounded-[10px] bg-pink-dark-2 px-3 py-2.5">
+          <span aria-hidden className="text-base text-bright-teal">✨</span>
+          <span className="text-base font-semibold text-pink-on-dark-soft">Refresh. Rest. Reset.</span>
         </div>
 
         <div className="mb-1.5 flex items-baseline gap-1.5">
@@ -120,6 +204,8 @@ export function HomePage() {
             <p className="text-[26px] font-extrabold leading-none text-white">Rs 99</p>
           </div>
         </div>
+
+        <RotatingPromoCard />
       </div>
 
       {/* Filter chips */}
@@ -160,20 +246,21 @@ export function HomePage() {
       <section className="px-4 py-3.5">
         <h2 className="mb-2.5 text-[15px] font-semibold text-gray-900">Popular Hyderabad areas</h2>
         <div className="grid grid-cols-2 gap-2.5">
-          {HYDERABAD_AREAS.slice(0, 4).map((area) => (
-            <Link key={area.name} to={`/search?q=${encodeURIComponent(area.name)}`}>
-              <div
-                className={`flex h-14 items-center justify-center rounded-[10px] ${
-                  area.tint === 'pink' ? 'bg-pink-tint' : 'bg-teal-tint'
-                }`}
-              >
-                <span aria-hidden className="text-lg">
-                  {area.icon}
-                </span>
-              </div>
-              <p className="mt-1.5 text-xs font-medium text-gray-900">{area.name}</p>
-            </Link>
-          ))}
+          {HYDERABAD_AREAS.slice(0, 4).map((area) => {
+            const Icon = AREA_ICONS[area.name] ?? BuildingIcon;
+            return (
+              <Link key={area.name} to={`/search?q=${encodeURIComponent(area.name)}`}>
+                <div
+                  className={`flex h-14 items-center justify-center rounded-[10px] ${
+                    area.tint === 'pink' ? 'bg-pink-tint' : 'bg-teal-tint'
+                  }`}
+                >
+                  <Icon className={`h-8 w-8 ${AREA_ICON_COLOR}`} />
+                </div>
+                <p className="mt-1.5 text-xs font-medium text-gray-900">{area.name}</p>
+              </Link>
+            );
+          })}
         </div>
       </section>
     </div>

@@ -48,9 +48,9 @@ export const MOCK_ROOMS: Room[] = [
       'Budget-friendly room right off the ORR, five minutes from the Financial District. Great for a quick refresh between meetings.',
     address: 'Nanakramguda, Gachibowli, Hyderabad',
     imageUrl:
-      'https://images.unsplash.com/photo-1631048148956-4a0e9a8a8f0c?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80',
     imageUrls: [
-      'https://images.unsplash.com/photo-1631048148956-4a0e9a8a8f0c?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80',
     ],
     pricePerHour: 99,
