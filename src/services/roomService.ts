@@ -13,6 +13,13 @@ export async function getAllRooms(): Promise<Room[]> {
     return Promise.resolve(MOCK_ROOMS);
   }
   const snap = await getDocs(collection(getFirebaseDb(), 'rooms'));
+  if (snap.empty) {
+    // Real Firestore is connected but `rooms` hasn't been seeded with real
+    // listings yet — fall back to the same mock catalog mock mode uses, so
+    // the site stays a working demo instead of going blank. Remove this
+    // fallback once real listings exist.
+    return MOCK_ROOMS;
+  }
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Room);
 }
 
@@ -21,7 +28,12 @@ export async function getRoomById(id: string): Promise<Room | undefined> {
     return Promise.resolve(getMockRoomById(id));
   }
   const snap = await getDoc(doc(getFirebaseDb(), 'rooms', id));
-  return snap.exists() ? ({ id: snap.id, ...snap.data() } as Room) : undefined;
+  if (snap.exists()) {
+    return { id: snap.id, ...snap.data() } as Room;
+  }
+  // Same fallback as getAllRooms — id might be one of the mock rooms linked
+  // to from a mock-backed listing page.
+  return getMockRoomById(id);
 }
 
 export async function searchRooms(query: string): Promise<Room[]> {
